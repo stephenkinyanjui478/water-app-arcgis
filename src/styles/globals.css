@@ -441,6 +441,18 @@ body {
 	flex-direction: column;
 	gap: 0.85rem;
 }
+/* Roomier type inside the dashboard meter cards. Slotted content stays in the
+   light DOM, so these selectors reach it; font-size on the host also cascades. */
+.meters calcite-card {
+	font-size: 1.05rem;
+}
+.meters calcite-card [slot="heading"] {
+	font-size: 1.2rem;
+	font-weight: 600;
+}
+.meters calcite-card .row-between {
+	font-size: 1.05rem;
+}
 
 /* ───────────────────────── Auth screens ───────────────────────── */
 .auth-wrap {

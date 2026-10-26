@@ -49,7 +49,7 @@ function MeterDetail({ meterNo }: { meterNo: string }) {
 			<div className="page-head">
 				<div>
 					<calcite-link
-						onClick={() => history.back()}
+						onClick={() => router.push("/")}
 						style={{ cursor: "pointer" }}
 						icon-start="chevron-left">
 						Back to meters
@@ -93,7 +93,11 @@ function MeterDetail({ meterNo }: { meterNo: string }) {
 				scale="l"
 				icon-start="credit-card"
 				disabled={unpaid.length ? undefined : ""}
-				onClick={() => router.push(`/pay/${encodeURIComponent(meterNo)}`)}>
+				onClick={() =>
+						router.push(
+							`/pay/${encodeURIComponent(meterNo)}?from=${encodeURIComponent(`/meters/${meterNo}`)}`
+						)
+					}>
 				Pay utility bill
 			</calcite-button>
 

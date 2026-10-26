@@ -26,7 +26,7 @@ function PayBillButton({ meters }: { meters: Meter[] }) {
 
 	const payable = meters.filter((m) => m.outstandingBill > 0);
 	const goPay = (meterNo: string) =>
-		router.push(`/pay/${encodeURIComponent(meterNo)}`);
+		router.push(`/pay/${encodeURIComponent(meterNo)}?from=%2F`);
 
 	const onClick = () => {
 		if (payable.length === 1) goPay(payable[0].meterNo);
