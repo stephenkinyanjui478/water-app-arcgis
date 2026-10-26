@@ -43,6 +43,13 @@ export default function Shell({ children }: { children: ReactNode }) {
 
   const displayName = user?.name || user?.email || "Customer";
 
+  // Show the customer's uploaded profile photo in the drawer avatar when present,
+  // falling back to initials (via full-name) otherwise.
+  const { data: avatarData } = useSWR<{ dataUrl: string | null }>(
+    user ? "/api/profile/avatar" : null
+  );
+  const avatarUrl = avatarData?.dataUrl || null;
+
   return (
     <div className="app">
       <header className="appbar app-top">
@@ -65,7 +72,11 @@ export default function Shell({ children }: { children: ReactNode }) {
       >
         <calcite-panel>
           <div className="drawer-head">
-            <calcite-avatar scale="l" full-name={displayName} />
+            <calcite-avatar
+              scale="l"
+              full-name={displayName}
+              thumbnail={avatarUrl || undefined}
+            />
             <div>
               <div className="drawer-user-name">{user?.name || "Customer"}</div>
               <div className="drawer-user-email">{user?.email}</div>

@@ -83,7 +83,12 @@ function PayFlow({ meterNo }: { meterNo: string }) {
     });
   };
 
-  const goBack = () => router.push(`/meters/${encodeURIComponent(meterNo)}`);
+  // Return to wherever we were launched from (dashboard or this meter's page).
+  const from =
+    typeof router.query.from === "string" && router.query.from.startsWith("/")
+      ? router.query.from
+      : `/meters/${encodeURIComponent(meterNo)}`;
+  const goBack = () => router.push(from);
 
   const refreshCaches = () => {
     mutate("/api/meters");
