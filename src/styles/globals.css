@@ -1,26 +1,539 @@
-@import "tailwindcss";
+/* ───────────────────────── Avenir Next (local OTF) ─────────────────────────
+   Loaded from /public/fonts and used for EVERYTHING, including Calcite web
+   components. The HEAVIEST weight used anywhere is Medium: requests for 500–900
+   all map to Avenir Next Medium, and font synthesis is disabled so the browser
+   never fakes a heavier weight. */
+@font-face {
+	font-family: "Avenir Next";
+	src: url("/fonts/Avenir Next Light.otf") format("opentype");
+	font-weight: 100 350;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Avenir Next";
+	src: url("/fonts/Avenir Next Regular.otf") format("opentype");
+	font-weight: 351 450;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Avenir Next";
+	src: url("/fonts/Avenir Next Medium.otf") format("opentype");
+	font-weight: 451 900;
+	font-style: normal;
+	font-display: swap;
+}
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+	--app-bg: #f5f6f8;
+	--app-gap: 1rem;
+	--appbar-h: 56px;
+	--brand: #0b5cab;
+	--brand-dark: #094a8a;
+	--brand-tint: #eef4fb;
+	--ink: #16181c;
+	--ink-muted: #6a6f75;
+	--line: #e6e8eb;
+	--font: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+	color-scheme: light;
+
+	/* Avenir Next for all Calcite components */
+	--calcite-font-family:
+		"Avenir Next", "Segoe UI", system-ui, sans-serif !important;
+	--calcite-font-family-primary:
+		"Avenir Next", "Segoe UI", system-ui, sans-serif !important;
+
+	/* Sharp corners everywhere (flatten every Calcite radius token) */
+	--calcite-corner-radius: 0 !important;
+	--calcite-corner-radius-none: 0 !important;
+	--calcite-corner-radius-sharp: 0 !important;
+	--calcite-corner-radius-xs: 0 !important;
+	--calcite-corner-radius-sm: 0 !important;
+	--calcite-corner-radius-round: 0 !important;
+	--calcite-border-radius: 0 !important;
+	--calcite-border-radius-base: 0 !important;
+	--calcite-border-radius-round: 0 !important;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+	box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+	margin: 0;
+	padding: 0;
+	background: var(--app-bg);
+	color: var(--ink);
+	font-family: var(--font);
+	font-synthesis: none;
+	-webkit-text-size-adjust: 100%;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	font-weight: 200 !important;
+}
+
+/* ───────────────────────── Layout ───────────────────────── */
+.content {
+	max-width: 980px;
+	margin: 0 auto;
+	padding: 1.1rem 0.9rem 2.5rem;
+}
+
+.page-head {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 0.6rem;
+	margin-bottom: 1.25rem;
+}
+.page-head h2 {
+	margin: 0;
+	font-size: 1.4rem;
+	font-weight: 500;
+	letter-spacing: -0.01em;
+}
+.page-head p {
+	margin: 0.15rem 0 0;
+	color: var(--ink-muted);
+	font-size: 0.92rem;
+}
+
+.grid {
+	display: grid;
+	gap: var(--app-gap);
+	grid-template-columns: 1fr;
+}
+.two-col {
+	display: grid;
+	gap: var(--app-gap);
+	grid-template-columns: 1fr;
+	align-items: start;
+}
+
+.stat-row {
+	display: grid;
+	gap: 0.6rem;
+	grid-template-columns: repeat(2, 1fr);
+	margin-bottom: 1.25rem;
+}
+.stat {
+	background: #fff;
+	border: 1px solid var(--line);
+	padding: 0.85rem 0.95rem;
+}
+.stat .label {
+	font-size: 0.68rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--ink-muted);
+	font-weight: 500;
+}
+.stat .value {
+	font-size: 1.4rem;
+	font-weight: 500;
+	margin-top: 0.2rem;
+	letter-spacing: -0.01em;
+}
+
+.form-grid {
+	display: grid;
+	gap: 1rem;
+}
+.form-row {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: 1fr;
+}
+.field-error {
+	color: #d83020;
+	font-size: 0.8rem;
+}
+.chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 9px;
+	font-size: 0.72rem;
+	font-weight: 500;
+	line-height: 1.6;
+	letter-spacing: 0.02em;
+	border: 1px solid transparent;
+	border-radius: 0;
+	white-space: nowrap;
+}
+.muted {
+	color: var(--ink-muted);
+}
+.empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 0.35rem;
+	padding: 2.5rem 1.5rem;
+	color: var(--ink-muted);
+}
+.empty-state-art {
+	color: #c4c9ce;
+	margin-bottom: 0.4rem;
+}
+.empty-state-title {
+	color: var(--ink);
+	font-size: 1rem;
+	font-weight: 600;
+}
+.empty-state-message {
+	max-width: 22rem;
+	font-size: 0.9rem;
+	line-height: 1.5;
+}
+.empty-state-action {
+	margin-top: 0.8rem;
+}
+.right {
+	text-align: right;
+}
+.stack {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+.row-between {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+.center-pad {
+	padding: 2.5rem 1rem;
+	text-align: center;
+}
+.avatar-row {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+.avatar-img {
+	width: 84px;
+	height: 84px;
+	border-radius: 999px;
+	object-fit: cover;
+	border: 1px solid var(--line);
+	flex: 0 0 auto;
+}
+.avatar-stack {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+}
+.avatar-img-lg {
+	width: 180px;
+	height: 180px;
+	border-radius: 999px;
+	object-fit: cover;
+	border: 1px solid var(--line);
+	flex: 0 0 auto;
+}
+.avatar-lg {
+	block-size: 180px;
+	inline-size: 180px;
+	font-size: 3.5rem;
+}
+.verify-status {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 0.85rem;
+	padding: 0.75rem 0 1rem;
+}
+.verify-badge {
+	width: 120px;
+	height: 120px;
+	border-radius: 999px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	font-size: 64px;
+	line-height: 1;
+	font-weight: 700;
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+.verify-badge.ok {
+	background: #35ac46;
+}
+.verify-badge.bad {
+	background: #d83020;
+}
+.verify-status-label {
+	font-size: 1.15rem;
+}
+.map-picker {
+	position: relative;
+	width: 100%;
+	height: 320px;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	overflow: hidden;
+}
+.map-picker-view {
+	position: absolute;
+	inset: 0;
+}
+.map-picker-pin {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -100%);
+	color: var(--brand);
+	pointer-events: none;
+	z-index: 1;
+	filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+}
+.table-scroll {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+/* ───────────────────────── Header (app bar) ───────────────────────── */
+.appbar {
+	position: sticky;
+	top: 0;
+	z-index: 20;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	height: var(--appbar-h);
+	padding: 0 0.6rem;
+	background: #fff;
+	border-bottom: 1px solid var(--line);
+}
+.appbar-brand {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	font-weight: 500;
+	font-size: 1rem;
+	color: var(--ink);
+}
+.appbar-spacer {
+	flex: 1;
+}
+
+/* Drawer (left aside) */
+.drawer-head {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 1rem;
+	border-bottom: 1px solid var(--line);
+}
+.drawer-user-name {
+	font-weight: 500;
+}
+.drawer-user-email {
+	color: var(--ink-muted);
+	font-size: 0.82rem;
+	word-break: break-all;
+}
+.drawer-nav {
+	display: flex;
+	flex-direction: column;
+	padding: 0.4rem;
+}
+.drawer-nav a {
+	display: flex;
+	align-items: center;
+	padding: 0.85rem 0.95rem;
+	text-decoration: none;
+	color: var(--ink);
+	font-weight: 400;
+	font-size: 1.12rem;
+	border-left: 3px solid transparent;
+	cursor: pointer;
+}
+.drawer-nav a:hover {
+	background: #f3f4f6;
+}
+.drawer-nav a.active {
+	color: var(--brand);
+	border-left-color: var(--brand);
+}
+
+/* ───────────────────────── Dashboard ───────────────────────── */
+.hello {
+	font-size: 2rem;
+	font-weight: 500;
+	letter-spacing: -0.02em;
+	margin: 0.4rem 0 1.1rem;
+	line-height: 1.1;
+}
+/* Lighter "Hello" greeting; the first name keeps the heading weight. */
+.hello-greeting {
+	font-weight: 300;
+	color: var(--ink-muted);
+}
+/* Esri-style indicator card */
+.stat-hero {
+	background: #fff;
+	border: 1px solid var(--line);
+	border-left: 4px solid var(--brand);
+	padding: 1.15rem 1.25rem;
+}
+.stat-hero-label {
+	font-size: 0.72rem;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--ink-muted);
+	font-weight: 500;
+}
+.stat-hero-value {
+	font-size: 2.5rem;
+	font-weight: 500;
+	letter-spacing: -0.02em;
+	line-height: 1.05;
+	margin-top: 0.3rem;
+}
+.stat-hero-sub {
+	color: var(--ink-muted);
+	font-size: 0.85rem;
+	margin-top: 0.4rem;
+}
+.pay-cta {
+	display: block;
+	margin: 0.85rem 0 1.9rem;
+}
+
+/* ─────────────── M-Pesa payment page ─────────────── */
+/* Keep the payment flow in a readable, centred column. */
+.pay-screen {
+	width: 100%;
+	max-width: 480px;
+	margin: 0 auto;
+}
+/* Itemised M-Pesa receipt on the success screen. */
+.receipt {
+	width: 100%;
+	max-width: 340px;
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	padding: 1rem 1.15rem;
+	border: 1px solid var(--line);
+	border-left: 4px solid #35ac46;
+	background: #fff;
+	text-align: left;
+	margin-top: 0.4rem;
+}
+.section-title {
+	font-size: 1.05rem;
+	font-weight: 500;
+	letter-spacing: -0.01em;
+	margin: 0 0 0.8rem;
+}
+.meters {
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+}
+
+/* ───────────────────────── Auth screens ───────────────────────── */
+.auth-wrap {
+	min-height: 100vh;
+	min-height: 100dvh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1.25rem;
+	background-image: url("/login.png");
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+.auth-card {
+	width: 100%;
+	max-width: 420px;
+	min-width: 0;
+}
+.auth-brand {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	color: #fff;
+	margin-bottom: 1.1rem;
+	justify-content: center;
+	text-align: center;
+}
+.auth-brand h1 {
+	font-size: 1.05rem;
+	margin: 0;
+	font-weight: 500;
+	letter-spacing: 0.01em;
+}
+.auth-title {
+	font-size: 1.9rem;
+	font-weight: 500;
+	letter-spacing: -0.02em;
+	margin: 0;
+}
+.auth-header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 0.5rem;
+}
+.auth-logo {
+	display: flex;
+	justify-content: center;
+	padding: 0.5rem 0 0.25rem;
+}
+.auth-logo img {
+	height: 56px;
+	width: auto;
+	max-width: 100%;
+	object-fit: contain;
+}
+.auth-forgot {
+	justify-self: end;
+	font-size: 0.85rem;
+	margin-top: -0.35rem;
+}
+
+/* ───────────────────────── Breakpoints ───────────────────────── */
+@media (min-width: 600px) {
+	.stat-row {
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	}
+	.form-row {
+		grid-template-columns: 1fr 1fr;
+	}
+	.page-head {
+		flex-direction: row;
+		align-items: flex-end;
+		justify-content: space-between;
+	}
+	.page-head h2 {
+		font-size: 1.55rem;
+	}
+	.hello {
+		font-size: 2.3rem;
+	}
+}
+
+@media (min-width: 768px) {
+	.content {
+		padding: 1.5rem 1rem 3rem;
+	}
+	.grid {
+		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+	}
+	.two-col {
+		grid-template-columns: 1fr 1fr;
+	}
 }

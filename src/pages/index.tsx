@@ -1,82 +1,207 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
+import { useState } from "react";
+import { useRouter } from "next/router";
+import useSWR from "swr";
+import Protected from "@/components/Protected";
+import { useAuth } from "@/lib/auth";
+import { kes, num } from "@/lib/format";
+import Chip, { type ChipKind } from "@/components/Chip";
+import EmptyState from "@/components/EmptyState";
+import type { Meter } from "@/lib/types";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+function firstNameOf(
+	name: string | null | undefined,
+	email: string | null | undefined
+): string {
+	const n = (name || "").trim();
+	if (n) return n.split(/\s+/)[0];
+	const e = (email || "").trim();
+	return e ? e.split("@")[0] : "there";
+}
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+/** Big "Pay utility bill" CTA. Navigates to the full payment page for a meter;
+ *  if several meters owe, a small chooser appears first to pick which one. */
+function PayBillButton({ meters }: { meters: Meter[] }) {
+	const router = useRouter();
+	const [picking, setPicking] = useState(false);
 
-export default function Home() {
-  return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black`}
-    >
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              index.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs/pages/getting-started?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+	const payable = meters.filter((m) => m.outstandingBill > 0);
+	const goPay = (meterNo: string) =>
+		router.push(`/pay/${encodeURIComponent(meterNo)}`);
+
+	const onClick = () => {
+		if (payable.length === 1) goPay(payable[0].meterNo);
+		else setPicking(true);
+	};
+
+	return (
+		<>
+			<calcite-button
+				class="pay-cta"
+				width="full"
+				scale="l"
+				icon-start="credit-card"
+				disabled={payable.length ? undefined : ""}
+				onClick={onClick}>
+				Pay total bill
+			</calcite-button>
+
+			{picking ? (
+				<calcite-dialog
+					open=""
+					modal=""
+					heading="Choose a meter to pay"
+					width-scale="s"
+					ref={(el: HTMLElement | null) => {
+						if (el)
+							el.addEventListener(
+								"calciteDialogClose",
+								() => setPicking(false),
+								{ once: true }
+							);
+					}}>
+					<calcite-list label="Meters with a balance" selection-mode="none">
+						{payable.map((m) => (
+							<calcite-list-item
+								key={m.meterNo}
+								label={`Meter ${m.meterNo}`}
+								description={`${m.dma || "—"} · ${kes(m.outstandingBill)} outstanding`}
+								onClick={() => goPay(m.meterNo)}>
+								<calcite-icon slot="content-end" icon="chevron-right" />
+							</calcite-list-item>
+						))}
+					</calcite-list>
+					<calcite-button
+						slot="footer-end"
+						appearance="outline"
+						kind="neutral"
+						onClick={() => setPicking(false)}>
+						Cancel
+					</calcite-button>
+				</calcite-dialog>
+			) : null}
+		</>
+	);
+}
+
+function statusChip(status: string | null) {
+	const kind: ChipKind =
+		status === "Connected"
+			? "success"
+			: status === "Suspended"
+				? "warning"
+				: status === "Disconnected"
+					? "danger"
+					: "neutral";
+	return (
+		<Chip slot="footer-start" kind={kind} rounded>
+			{status || "Unknown"}
+		</Chip>
+	);
+}
+
+function Dashboard() {
+	const router = useRouter();
+	const { user } = useAuth();
+	const { data, error, isLoading } = useSWR<{ meters: Meter[] }>("/api/meters");
+
+	const firstName = firstNameOf(user?.name, user?.email);
+	const meters = data?.meters ?? [];
+	const totalOutstanding = meters.reduce(
+		(s, m) => s + (m.outstandingBill || 0),
+		0
+	);
+
+	return (
+		<>
+			<h1 className="hello">
+				<span className="hello-greeting">Hello </span>
+				{firstName}
+			</h1>
+
+			{isLoading ? (
+				<div className="center-pad">
+					<calcite-loader label="Loading your account" />
+				</div>
+			) : error ? (
+				<calcite-notice open="" kind="danger" icon="exclamation-mark-triangle">
+					<div slot="title">Could not load your account</div>
+					<div slot="message">{String(error.message || error)}</div>
+				</calcite-notice>
+			) : (
+				<>
+					<div className="stat-hero">
+						<div className="stat-hero-label">Total outstanding</div>
+						<div
+							className="stat-hero-value"
+							style={{ color: totalOutstanding > 0 ? "#b3261e" : "#176b2c" }}>
+							{kes(totalOutstanding)}
+						</div>
+					</div>
+
+					<PayBillButton meters={meters} />
+
+					<h2 className="section-title">My meters</h2>
+
+					{meters.length ? (
+						<div className="meters">
+							{meters.map((m) => (
+								<calcite-card
+									key={m.meterNo}
+									style={{ cursor: "pointer" }}
+									onClick={() =>
+										router.push(`/meters/${encodeURIComponent(m.meterNo)}`)
+									}>
+									<div slot="heading">Meter {m.meterNo}</div>
+									<div className="stack" style={{ gap: "0.45rem" }}>
+										<div className="row-between">
+											<span className="muted">Outstanding</span>
+											<strong
+												style={{
+													color: m.outstandingBill > 0 ? "#b3261e" : "#176b2c"
+												}}>
+												{kes(m.outstandingBill)}
+											</strong>
+										</div>
+										<div className="row-between">
+											<span className="muted">Latest reading</span>
+											<span>
+												{m.latestReading != null
+													? `${num(m.latestReading)} m³`
+													: "—"}
+											</span>
+										</div>
+										<div className="row-between">
+											<span className="muted">Tariff</span>
+											<span>{m.tariff || "—"}</span>
+										</div>
+									</div>
+									{statusChip(m.connStatus)}
+									<calcite-button
+										slot="footer-end"
+										scale="s"
+										appearance="transparent"
+										icon-end="chevron-right">
+										Open
+									</calcite-button>
+								</calcite-card>
+							))}
+						</div>
+					) : (
+						<EmptyState
+							title="No meters linked to your account yet"
+							message="Contact support so your meter can be linked to your email."
+						/>
+					)}
+				</>
+			)}
+		</>
+	);
+}
+
+export default function DashboardPage() {
+	return (
+		<Protected>
+			<Dashboard />
+		</Protected>
+	);
 }

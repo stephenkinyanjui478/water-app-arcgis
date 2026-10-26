@@ -9,9 +9,15 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@arcgis/core": "^5.1.27",
+    "@arcgis/map-components": "^5.1.27",
+    "@esri/calcite-components": "^5.2.0",
+    "formik": "^2.4.9",
     "next": "16.4.3",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "swr": "^2.5.1",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
